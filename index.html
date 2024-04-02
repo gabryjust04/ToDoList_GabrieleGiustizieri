@@ -1,0 +1,130 @@
+<html>
+   <head>
+      <title>To do list app</title>
+      <link rel="stylesheet" href="style.css">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" rel="stylesheet">
+   </head>
+   <body>
+      <div class="container">
+         <span class="error-span" style="display: none;">Please Enter Valid Value</span>
+         <h1 class="title">To Do List</h1>
+         <div class="form-container">
+               <input class="input-text" type="text" id="inputForm" placeholder="Name..">
+               <button class="add-button" type="button" id="add">Add Item</button>
+         </div>
+         <div class="list-container">
+            <ul id="list" class="to-do-list">
+            </ul>
+         </div>
+         <button class="clear-items-button">
+            Clear items
+         </button>
+      </div>
+   </body>
+
+
+   <script>
+      //Script per gestire gli elementi e interfacciarsi con il local storage
+      const inputForm = document.getElementById('inputForm');
+      const addButton = document.getElementById('add');
+      const list = document.getElementById('list');
+      const clearItemsButton = document.querySelector('.clear-items-button');
+      const errorSpan = document.querySelector('.error-span');
+
+      //Funzione per aggiungere un elemento alla lista
+      function addItem() {
+         if (inputForm.value === '') {
+            errorSpan.style.display = 'block';
+            setTimeout(() => {
+               errorSpan.style.display = 'none';
+            }, 2000);
+            return;
+         }
+         errorSpan.style.display = 'none';
+         const li = document.createElement('li');
+         li.innerHTML = "<span>" + inputForm.value + "</span><div class='button-container'><a class='check-button'><i id='checkButton' class='bi bi-check-circle'></i></a><a class='edit-button'><i id='editButton' class='bi bi-pencil-square'></i></a><a class='delete-button'><i class='bi bi-x-circle' id='deleteButton'></i></a></div>";
+         list.appendChild(li);
+         inputForm.value = '';
+         saveItems();
+      }
+
+      //Funzione per rimuovere un elemento dalla lista
+      function removeItem(e) {
+         console.log(e.target.id);
+         if (e.target.id === 'deleteButton') {
+            e.target.parentElement.parentElement.parentElement.remove();
+            saveItems();
+         }
+      }
+
+      //Funzione per modificare un elemento della lista
+      function editItem(e) {
+         if (e.target.id === 'editButton') {
+            inputForm.value = e.target.parentElement.parentElement.parentElement.querySelector('span').innerText;
+            e.target.parentElement.parentElement.parentElement.remove();
+
+         }
+      }
+
+      //Funzione per spuntare un elemento della lista
+      function checkItem(e) {
+         if (e.target.id === 'checkButton') {
+            e.target.parentElement.parentElement.parentElement.querySelector('span').classList.toggle('checked');
+            e.target.classList.toggle('checked-button');
+            saveItems();
+         }
+      }
+
+      //Funzione per salvare gli elementi della lista nel local storage
+      function saveItems() {
+         const items = [];
+         allItems = list.querySelectorAll('li');
+         for(let li of allItems){
+            const text = li.querySelector('span').innerText;
+            const checked = li.querySelector('span').classList.contains('checked');
+            items.push({ text, checked });
+         }
+         localStorage.setItem('items', JSON.stringify(items));
+      }
+
+      //Funzione per caricare gli elementi della lista dal local storage
+      function loadItems() {
+         const items = JSON.parse(localStorage.getItem('items')) || [];
+         items.forEach((item) => {
+            const li = document.createElement('li');
+            li.innerHTML = "<span>" + item.text + "</span><div class='button-container'><a class='check-button'><i id='checkButton' class='bi bi-check-circle'></i></a><a class='edit-button'><i id='editButton' class='bi bi-pencil-square'></i></a><a class='delete-button'><i class='bi bi-x-circle' id='deleteButton'></i></a></div>";
+            if (item.checked) {
+               li.querySelector('span').classList.add('checked');
+            }
+            list.appendChild(li);
+         });
+      }
+
+      //Funzione per pulire la lista
+      function clearItems() {
+         list.innerHTML = '';
+         saveItems();
+      }
+
+      //Event listener per aggiungere un elemento alla lista
+      addButton.addEventListener('click', addItem);
+
+      //Event listener per rimuovere un elemento dalla lista
+      list.addEventListener('click', removeItem);
+
+      //Event listener per modificare un elemento della lista
+      list.addEventListener('click', editItem);
+
+      //Event listener per spuntare un elemento della lista
+      list.addEventListener('click', checkItem);
+
+      //Event listener per pulire la lista
+      clearItemsButton.addEventListener('click', clearItems);
+
+      //Caricamento degli elementi della lista dal local storage
+      loadItems();
+
+
+   </script>
+</html>
+
